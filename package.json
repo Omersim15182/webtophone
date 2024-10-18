@@ -1,0 +1,19 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "jssip": "^3.10.1",
+    "peerjs": "^1.5.4",
+    "sip": "^0.0.6",
+    "sip.js": "^0.21.2"
+  }
+}
