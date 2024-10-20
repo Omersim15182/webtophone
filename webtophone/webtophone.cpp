@@ -32,8 +32,6 @@ int main()
     ep.libStart();
     std::cout << "*** PJSUA2 STARTED ***" << std::endl;
 
-    MyAccount myAccount;          // Ensure MyAccount is properly initialized
-
     // Configure an AccountConfig
     AccountConfig acfg;
     acfg.idUri = "sip:omer2002simhi@sip.linphone.org";
@@ -50,7 +48,7 @@ int main()
     WebSocketServer server(ioc, 8080, *acc);
 
     // Run the io_context to keep the server alive
-    ioc.run();  // Instead of ioc.poll()
+    ioc.run();  
 
     // While loop to ensure continuous execution for the SIP stack
     while (true)
