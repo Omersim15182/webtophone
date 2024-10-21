@@ -32,6 +32,9 @@ int main()
     ep.libStart();
     std::cout << "*** PJSUA2 STARTED ***" << std::endl;
 
+    // Initialize the MyAccount instance
+    MyAccount accountManager;
+
     // Configure an AccountConfig
     AccountConfig acfg;
     acfg.idUri = "sip:omer2002simhi@sip.linphone.org";
@@ -43,9 +46,24 @@ int main()
     MyAccount* acc = new MyAccount;
     acc->create(acfg);
 
+    accountManager.addAccount("omer2002simhi", acfg);
+
+    // test account for call
+    AccountConfig acfg2;
+    acfg2.idUri = "sip:omer2002@sip.linphone.org";
+    acfg2.regConfig.registrarUri = "sip:sip.linphone.org";
+    AuthCredInfo cred2("digest", "*", "omer2002", 0, "omer2002");
+    acfg2.sipConfig.authCreds.push_back(cred2);
+
+    // Create the second account
+    MyAccount* acc2 = new MyAccount;
+    acc2->create(acfg2);
+    accountManager.addAccount("omer2002", acfg2);
+
+
     // WebSocket server setup
     boost::asio::io_context ioc;
-    WebSocketServer server(ioc, 8080, *acc);
+    WebSocketServer server(ioc, 8080, accountManager);
 
     // Run the io_context to keep the server alive
     ioc.run();  
