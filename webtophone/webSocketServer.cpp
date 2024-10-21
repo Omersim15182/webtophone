@@ -60,28 +60,40 @@ void WebSocketServer::Session::on_read(beast::error_code ec, std::size_t bytes_t
     if (Json::parseFromStream(reader, iss, &json_message, &errs)) {
         if (json_message.isMember("type") && json_message["type"].asString() == "offer" &&
             json_message.isMember("sdp")) {
+
             std::string sdp = json_message["sdp"].asString();
-            cout << "SDP offer received." << endl;
+            std::string phoneNumber = json_message["number"].asString();
+            cout << "Attempting to initiate call to: " << phoneNumber << endl;
 
-            CallOpParam call_op;
-            call_op.statusCode = PJSIP_SC_OK;
-            std::string sip_uri = "sip:omer2002simhi@sip.linphone.org";
-            MyCall* new_call = new MyCall(myAccount_);
+            // Check if the phone number exist
+            MyAccount* account = myAccount_.getAccountByPhoneNumber(phoneNumber);
+            if (account) {
+                CallOpParam call_op;
+                call_op.statusCode = PJSIP_SC_OK;
+                std::string sip_uri = "sip:"+phoneNumber+"@sip.linphone.org";
+                MyCall* new_call = new MyCall(*account);
 
-            try {
-                new_call->makeCall(sip_uri, call_op);
+                try {
+                    new_call->makeCall(sip_uri, call_op);
+                }
+                catch (Error& err) {
+                    cout << "Error making call: " << err.info() << endl;
+                }
+
+                send_sdp_ok(); // Send SDP response
             }
-            catch (Error& err) {
-                cout << "Error making call: " << err.info() << endl;
+            else {
+                cout << "No account found for phone number: " << phoneNumber << endl;
             }
-
-            cout << "Call initiated with SDP offer sent to SIP endpoint." << endl;
         }
-        send_sdp_ok();
+        else {
+            cout << "Invalid message format." << endl;
+        }
     }
     else {
         cout << "JSON parse error: " << errs << endl;
     }
+
 
     ws_.async_write(buffer_.data(), beast::bind_front_handler(&Session::on_write, shared_from_this()));
 }
@@ -138,8 +150,6 @@ void WebSocketServer::Session::send_sdp_ok() {
     ws_.async_write(net::buffer(response_str),
         beast::bind_front_handler(&Session::on_write, shared_from_this()));
 }
-
-
 
 void WebSocketServer::Session::on_write(beast::error_code ec, std::size_t bytes_transferred) {
     buffer_.consume(buffer_.size());
