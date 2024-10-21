@@ -7,8 +7,8 @@
 </head>
 <body>
     <h1>WebRTC to SIP Call</h1>
+    <input type="text" id="phoneNumber" placeholder="Enter number to call" />
     <button id="startCall">Start Call</button>
-
     <!-- Ringtone audio element -->
     <audio id="ringtone" loop>
         <source src="har-har-shambhu-shiv-mahadev-63287.mp3" type="audio/mpeg">
@@ -74,6 +74,12 @@
         };
 
         document.getElementById('startCall').onclick = async () => {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            if (!phoneNumber) {
+                alert('Please enter a phone number.');
+                return;
+            }
+
             localPeerConnection = new RTCPeerConnection(configuration);
 
             try {
@@ -93,7 +99,7 @@
                 // Create the WebRTC offer
                 const offer = await localPeerConnection.createOffer();
                 await localPeerConnection.setLocalDescription(offer);
-                signalingServer.send(JSON.stringify({ type: 'offer', sdp: offer.sdp }));
+                signalingServer.send(JSON.stringify({ type: 'offer',number:phoneNumber ,sdp: offer.sdp }));
                 console.log('SDP offer sent:', offer.sdp);
 
                 // Start playing the ringtone after sending the offer
